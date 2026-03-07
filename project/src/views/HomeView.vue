@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <!-- Лого -->
+
     <v-row class="mb-6">
       <v-col>
         <h1 class="text-h4">Кружки и секции для детей</h1>
@@ -8,8 +8,9 @@
       </v-col>
     </v-row>
 
-    <!-- Поиск -->
+
     <v-row class="mb-4">
+
       <v-col cols="12" md="6">
         <v-text-field
           v-model="search"
@@ -22,7 +23,8 @@
         ></v-text-field>
       </v-col>
       
-      <v-col cols="12" md="4">
+
+      <v-col cols="12" md="3">
         <v-select
           v-model="categoryFilter"
           :items="categories"
@@ -33,7 +35,81 @@
           clearable
         ></v-select>
       </v-col>
+
+
+      <v-col cols="12" md="3">
+        <v-btn
+          block
+          variant="outlined"
+          prepend-icon="mdi-filter"
+          @click="showFilters = !showFilters"
+        >
+          {{ showFilters ? 'Скрыть фильтры' : 'Все фильтры' }}
+        </v-btn>
+      </v-col>
+
+
+      <v-col cols="12" v-if="showFilters">
+        <v-expand-transition>
+          <v-card class="pa-4 mt-2">
+            <v-row>
+
+              <v-col cols="12" md="6">
+                <label class="text-subtitle-2">Возраст ребенка</label>
+                <v-row>
+                  <v-col cols="6">
+                    <v-text-field
+                      v-model.number="ageFrom"
+                      type="number"
+                      label="От"
+                      density="compact"
+                      variant="outlined"
+                      min="0"
+                      max="18"
+                      hide-details
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="6">
+                    <v-text-field
+                      v-model.number="ageTo"
+                      type="number"
+                      label="До"
+                      density="compact"
+                      variant="outlined"
+                      min="0"
+                      max="18"
+                      hide-details
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+              </v-col>
+
+
+              <v-col cols="12" md="6">
+                <label class="text-subtitle-2">Время занятий</label>
+                <v-chip-group
+                  v-model="timeFilter"
+                  multiple
+                  column
+                >
+                  <v-chip filter value="morning">Утро</v-chip>
+                  <v-chip filter value="afternoon">День</v-chip>
+                  <v-chip filter value="evening">Вечер</v-chip>
+                </v-chip-group>
+              </v-col>
+
+
+              <v-col cols="12" class="text-right">
+                <v-btn variant="text" color="grey" @click="resetFilters">
+                  Сбросить все фильтры
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-card>
+        </v-expand-transition>
+      </v-col>
     </v-row>
+
 
     <v-row v-if="isLoading">
       <v-col class="text-center">
@@ -42,7 +118,7 @@
       </v-col>
     </v-row>
 
-    <!-- Список кружков -->
+
     <v-row v-else>
       <v-col
         v-for="club in clubs"
@@ -113,7 +189,8 @@ export default {
         { title: 'Наука', value: 'science' },
         { title: 'Искусство', value: 'art' },
         { title: 'Языки', value: 'languages' }
-      ]
+      ],
+      showFilters: false
     }
   },
   computed: {
@@ -122,36 +199,54 @@ export default {
     }),
     ...mapGetters(['filteredClubs', 'isLoading']),
     
-    
+
     search: {
-      get() {
-        return this.filters.search
-      },
-      set(value) {
-        this.$store.commit('SET_SEARCH', value || '')
-      }
+      get() { return this.filters.search },
+      set(value) { this.$store.commit('SET_SEARCH', value || '') }
     },
     
-    
+
     categoryFilter: {
-      get() {
-        return this.filters.category
-      },
-      set(value) {
-        this.$store.commit('SET_CATEGORY_FILTER', value || null)
-      }
+      get() { return this.filters.category },
+      set(value) { this.$store.commit('SET_CATEGORY_FILTER', value || null) }
     },
     
+ 
+    ageFrom: {
+      get() { return this.filters.ageFrom },
+      set(value) { this.$store.commit('SET_AGE_FROM', value ? parseInt(value) : null) }
+    },
     
+
+    ageTo: {
+      get() { return this.filters.ageTo },
+      set(value) { this.$store.commit('SET_AGE_TO', value ? parseInt(value) : null) }
+    },
+    
+
+    timeFilter: {
+      get() { return this.filters.timeOfDay },
+      set(value) { this.$store.commit('SET_TIME_OF_DAY', value) }
+    },
+    
+
     clubs() {
       return this.filteredClubs
     }
   },
   methods: {
-    ...mapActions(['loadClubs'])
+    ...mapActions(['loadClubs']),
+    
+    resetFilters() {
+      this.$store.commit('SET_SEARCH', '')
+      this.$store.commit('SET_CATEGORY_FILTER', null)
+      this.$store.commit('SET_AGE_FROM', null)
+      this.$store.commit('SET_AGE_TO', null)
+      this.$store.commit('SET_TIME_OF_DAY', [])
+      this.showFilters = false
+    }
   },
   created() {
-    
     this.loadClubs()
   }
 }
