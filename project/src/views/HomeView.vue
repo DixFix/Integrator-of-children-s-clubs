@@ -1,6 +1,6 @@
 <template>
   <v-container>
-
+    
     <v-row class="mb-6">
       <v-col>
         <h1 class="text-h4">Кружки и секции для детей</h1>
@@ -8,9 +8,9 @@
       </v-col>
     </v-row>
 
-
+    
     <v-row class="mb-4">
-
+      
       <v-col cols="12" md="6">
         <v-text-field
           v-model="search"
@@ -23,7 +23,7 @@
         ></v-text-field>
       </v-col>
       
-
+      
       <v-col cols="12" md="3">
         <v-select
           v-model="categoryFilter"
@@ -36,7 +36,7 @@
         ></v-select>
       </v-col>
 
-
+      
       <v-col cols="12" md="3">
         <v-btn
           block
@@ -48,12 +48,12 @@
         </v-btn>
       </v-col>
 
-
+      
       <v-col cols="12" v-if="showFilters">
         <v-expand-transition>
           <v-card class="pa-4 mt-2">
             <v-row>
-
+              
               <v-col cols="12" md="6">
                 <label class="text-subtitle-2">Возраст ребенка</label>
                 <v-row>
@@ -84,7 +84,7 @@
                 </v-row>
               </v-col>
 
-
+              
               <v-col cols="12" md="6">
                 <label class="text-subtitle-2">Время занятий</label>
                 <v-chip-group
@@ -98,7 +98,7 @@
                 </v-chip-group>
               </v-col>
 
-
+              
               <v-col cols="12" class="text-right">
                 <v-btn variant="text" color="grey" @click="resetFilters">
                   Сбросить все фильтры
@@ -109,8 +109,48 @@
         </v-expand-transition>
       </v-col>
     </v-row>
-
-
+        
+    <v-row class="mb-6">
+      <v-col cols="12">
+        <v-card
+          color="primary-lighten-5"
+          class="pa-4"
+          variant="outlined"
+        >
+          <v-row align="center">
+            <v-col cols="12" md="8">
+              <div class="d-flex align-center">
+                <v-icon
+                  size="48"
+                  color="primary"
+                  class="mr-4"
+                >
+                  mdi-map-search
+                </v-icon>
+                <div>
+                  <h3 class="text-h6">Найти кружок на карте</h3>
+                  <p class="text-body-2 text-grey mb-0">
+                    Посмотрите, какие кружки находятся рядом с вами
+                  </p>
+                </div>
+              </div>
+            </v-col>
+            
+            <v-col cols="12" md="4" class="text-right">
+              <v-btn
+                color="primary"
+                size="large"
+                to="/#"
+                prepend-icon="mdi-map"
+              >
+                Открыть карту (скоро)
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card>
+      </v-col>
+    </v-row>
+    
     <v-row v-if="isLoading">
       <v-col class="text-center">
         <v-progress-circular indeterminate color="primary"></v-progress-circular>
@@ -118,7 +158,7 @@
       </v-col>
     </v-row>
 
-
+    
     <v-row v-else>
       <v-col
         v-for="club in clubs"
@@ -129,6 +169,18 @@
         lg="3"
       >
         <v-card class="h-100" :to="`/club/${club.id}`">
+          
+          <v-btn
+            icon
+            density="compact"
+            :color="isFavorite(club.id) ? 'red' : 'grey'"
+            variant="text"
+            class="favorite-btn"
+            @click.prevent="toggleFavorite(club.id)"
+          >
+            <v-icon>{{ isFavorite(club.id) ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
+          </v-btn>
+          
           <v-img
             :src="club.image"
             height="150"
@@ -197,45 +249,45 @@ export default {
     ...mapState({
       filters: state => state.filters
     }),
-    ...mapGetters(['filteredClubs', 'isLoading']),
+    ...mapGetters(['filteredClubs', 'isLoading', 'isFavorite']), 
     
-
+    
     search: {
       get() { return this.filters.search },
       set(value) { this.$store.commit('SET_SEARCH', value || '') }
     },
     
-
+    
     categoryFilter: {
       get() { return this.filters.category },
       set(value) { this.$store.commit('SET_CATEGORY_FILTER', value || null) }
     },
     
- 
+   
     ageFrom: {
       get() { return this.filters.ageFrom },
       set(value) { this.$store.commit('SET_AGE_FROM', value ? parseInt(value) : null) }
     },
     
-
+    
     ageTo: {
       get() { return this.filters.ageTo },
       set(value) { this.$store.commit('SET_AGE_TO', value ? parseInt(value) : null) }
     },
     
-
+    
     timeFilter: {
       get() { return this.filters.timeOfDay },
       set(value) { this.$store.commit('SET_TIME_OF_DAY', value) }
     },
     
-
+    
     clubs() {
       return this.filteredClubs
     }
   },
   methods: {
-    ...mapActions(['loadClubs']),
+    ...mapActions(['loadClubs', 'toggleFavorite']), 
     
     resetFilters() {
       this.$store.commit('SET_SEARCH', '')
@@ -248,6 +300,8 @@ export default {
   },
   created() {
     this.loadClubs()
+    
+    this.$store.commit('LOAD_FAVORITES_FROM_STORAGE')
   }
 }
 </script>
@@ -255,5 +309,13 @@ export default {
 <style scoped>
 .h-100 {
   height: 100%;
+}
+
+.favorite-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 1;
+  background-color: rgba(255, 255, 255, 0.7) !important;
 }
 </style>

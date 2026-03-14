@@ -1,6 +1,4 @@
-
 import { createStore } from 'vuex'
-
 
 const mockClubs = [
   {
@@ -74,12 +72,13 @@ export default createStore({
     return {
       clubs: [],
       loading: false,
+      favorites: [], 
       filters: {
         search: '',
         category: null,
-        ageFrom: null,      
-        ageTo: null,        
-        timeOfDay: []       
+        ageFrom: null,
+        ageTo: null,
+        timeOfDay: []
       }
     }
   },
@@ -104,24 +103,57 @@ export default createStore({
     },
     SET_TIME_OF_DAY(state, times) {
       state.filters.timeOfDay = times
+    },
+    
+    ADD_TO_FAVORITES(state, clubId) {
+      if (!state.favorites.includes(clubId)) {
+        state.favorites.push(clubId)
+      }
+    },
+    REMOVE_FROM_FAVORITES(state, clubId) {
+      state.favorites = state.favorites.filter(id => id !== clubId)
+    },
+    LOAD_FAVORITES_FROM_STORAGE(state) {
+      const saved = localStorage.getItem('favorites')
+      if (saved) {
+        state.favorites = JSON.parse(saved)
+      }
     }
   },
   actions: {
-
     loadClubs({ commit }) {
       commit('SET_LOADING', true)
-
 
       setTimeout(() => {
         commit('SET_CLUBS', mockClubs)
         commit('SET_LOADING', false)
       }, 500)
+    },
+    
+    saveFavoritesToStorage({ state }) {
+      localStorage.setItem('favorites', JSON.stringify(state.favorites))
+    },
+    toggleFavorite({ commit, dispatch, state }, clubId) {
+      if (state.favorites.includes(clubId)) {
+        commit('REMOVE_FROM_FAVORITES', clubId)
+      } else {
+        commit('ADD_TO_FAVORITES', clubId)
+      }
+      dispatch('saveFavoritesToStorage')
     }
   },
   getters: {
-
     allClubs: state => state.clubs,
 
+    isLoading: state => state.loading,
+
+    
+    favoriteClubs: state => {
+      return state.clubs.filter(club => state.favorites.includes(club.id))
+    },
+    isFavorite: state => (clubId) => {
+      return state.favorites.includes(clubId)
+    },
 
     filteredClubs: state => {
       return state.clubs.filter(club => {
@@ -139,15 +171,12 @@ export default createStore({
           const clubMaxAge = club.ageMax
 
           if (state.filters.ageFrom && state.filters.ageTo) {
-            
             ageMatch = (state.filters.ageFrom >= clubMinAge && state.filters.ageFrom <= clubMaxAge) ||
               (state.filters.ageTo >= clubMinAge && state.filters.ageTo <= clubMaxAge) ||
               (state.filters.ageFrom <= clubMinAge && state.filters.ageTo >= clubMaxAge)
           } else if (state.filters.ageFrom) {
-            
             ageMatch = state.filters.ageFrom <= clubMaxAge
           } else if (state.filters.ageTo) {
-            
             ageMatch = state.filters.ageTo >= clubMinAge
           }
         }
@@ -155,7 +184,6 @@ export default createStore({
         
         let timeMatch = true
         if (state.filters.timeOfDay.length > 0) {
-          
           const schedule = club.schedule.toLowerCase()
           timeMatch = state.filters.timeOfDay.some(time => {
             if (time === 'morning') return schedule.includes('утр') || schedule.includes('10:')
@@ -167,9 +195,6 @@ export default createStore({
 
         return searchMatch && categoryMatch && ageMatch && timeMatch
       })
-    },
-
-
-    isLoading: state => state.loading
+    }
   }
 })

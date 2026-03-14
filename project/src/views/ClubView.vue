@@ -14,6 +14,7 @@
     </v-row>
 
     <v-row v-else>
+      
       <v-col cols="12" md="4">
         <v-img :src="club.image" height="250" cover rounded></v-img>
       </v-col>
@@ -58,6 +59,7 @@
         </v-list>
       </v-col>
 
+      
       <v-col cols="12" class="mt-4">
         <v-card>
           <v-card-title>Расписание занятий</v-card-title>
@@ -67,6 +69,7 @@
         </v-card>
       </v-col>
 
+      
       <v-col cols="12" class="mt-4">
         <v-card>
           <v-card-title>Отзывы</v-card-title>
@@ -88,6 +91,7 @@
         </v-card>
       </v-col>
 
+      
       <v-col cols="12" class="text-center mt-4">
         <v-btn color="success" size="large" @click="showBookingDialog = true">
           Записаться онлайн
@@ -95,6 +99,7 @@
       </v-col>
     </v-row>
 
+    
     <v-dialog v-model="showBookingDialog" max-width="500">
       <v-card>
         <v-card-title>Запись на занятие</v-card-title>
@@ -132,6 +137,7 @@
       </v-card>
     </v-dialog>
 
+    
     <v-snackbar
       v-model="showSuccessNotification"
       timeout="3000"
@@ -163,16 +169,15 @@ export default {
       club: null,
       loading: true,
       showBookingDialog: false,
-      showSuccessNotification: false, 
+      showSuccessNotification: false,  
       booking: {
         childName: '',
         childAge: '',
         phone: ''
       },
       reviews: [
-        { author: 'Анна', rating: 5, text: 'Ребенку очень понравилось!' },
-        { author: 'Михаил', rating: 5, text: 'Ребенок доволен!' },
-        { author: 'Елена', rating: 5, text: 'Занятие прошло идеально, ребенку очень понравилось.' },
+        { author: 'Анна', rating: 5, text: 'Отличный кружок, ребенок в восторге!' },
+        { author: 'Михаил', rating: 4, text: 'Хорошие преподаватели, но дороговато' }
       ]
     }
   },
@@ -186,7 +191,7 @@ export default {
       this.loading = false
     },
     submitBooking() {
-    
+      
       if (!this.booking.childName || !this.booking.childAge || !this.booking.phone) {
         alert('Пожалуйста, заполните все поля')
         return
@@ -201,7 +206,7 @@ export default {
       
       this.showSuccessNotification = true
       
-     
+      
       this.booking = { childName: '', childAge: '', phone: '' }
     }
   },
